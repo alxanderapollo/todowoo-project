@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.db import IntegrityError #checks to see if the user has already created an object that already exists in the DB
 from django.contrib.auth import login, logout, authenticate
+from .forms import TodoForm
 # Create your views here.
 
 def home(request):
@@ -22,7 +23,7 @@ def signupuser(request):
                 login(request, user)
                 return redirect('currenttodos')
             except IntegrityError :
-                return render(request, 'todo/signupuser.html',{'form':UserCreationForm(), 'error':'That username has already been taken! Please choose a new user name '})
+                return render(request, 'todo/signupuser.html',{'form':UserCreationForm(), 'error':'That username has already been taken! Please choose a new user name. Try Again '})
 
                 
         else:
@@ -51,5 +52,24 @@ def loginuser(request):
 
 def currenttodos(request):
      return render(request,'todo/currenttodos.html')
-
+ 
+def createtodo(request):
+    if request.method == 'GET':
+        return render(request, 'todo/createtodo.html',{'form':TodoForm()})
+    else:
+        try:
+            #first get the information from the post request and connect with our form
+            #pass in any informatin that is saved in POST
+            form = TodoForm(request.POST)
+            #create a new todo objext and dont put it in the data base yet
+            newTodo = form.save(commit=False)
+            #the object will get the user, so we are specifying only the user
+            newTodo.user = request.user
+            #now put it back into the data base
+            newTodo.save()
+            #return back to the page
+            return redirect('currenttodos')
+        except ValueError:
+            return  render(request, 'todo/createtodo.html',{'form':TodoForm(), 'error':'Bad Data passed in'})
+       
 
