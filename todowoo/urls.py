@@ -26,5 +26,5 @@ urlpatterns = [
     
     #todos
     path('current/', views.currenttodos, name ="currenttodos"),
-    path('', views.home, name =''),
+    path('', views.home, name ='home'),
 ]
