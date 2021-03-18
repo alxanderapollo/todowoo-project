@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm 
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm 
 # to generate the model to create a user object
 from django.contrib.auth.models import User
 from django.db import IntegrityError #checks to see if the user has already created an object that already exists in the DB
-from django.contrib.auth import login 
+from django.contrib.auth import login, logout, authenticate
 # Create your views here.
+
+def home(request):
+    return render(request, 'todo/home.html')
+    
 def signupuser(request):
     if request.method == 'GET':
         #passing in django user creation forms
@@ -25,6 +29,27 @@ def signupuser(request):
              return render(request, 'todo/signupuser.html',{'form':UserCreationForm(), 'error':'Passwords did not match'})
             #tell the user the passwords didnt match
 
+def logoutuser(request):
+    if request.method =='POST':
+        logout(request)
+        return redirect('home')
+
+def loginuser(request):
+    
+     if request.method == 'GET':
+            #passing in django user creation forms
+        return render(request, 'todo/loginuser.html',{'form':AuthenticationForm()})
+     else:
+         #returns a a user object
+        user =  authenticate(request, username=request.POST['username'], password=request.POST['password'])
+        #if the username did not match throw it doesnt exist error
+        if user is None:
+            return render(request, 'todo/loginuser.html',{'form':AuthenticationForm(),'error': 'Username and password did not match'})
+        else:
+            login(request, user)
+            return redirect('currenttodos')
+
 def currenttodos(request):
      return render(request,'todo/currenttodos.html')
+
 
