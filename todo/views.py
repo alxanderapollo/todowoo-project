@@ -6,6 +6,7 @@ from django.db import IntegrityError #checks to see if the user has already crea
 from django.contrib.auth import login, logout, authenticate
 from .forms import TodoForm
 from .models import Todo
+from django.utils import timezone
 # Create your views here.
 
 def home(request):
@@ -93,3 +94,20 @@ def createtodo(request):
             return  render(request, 'todo/createtodo.html',{'form':TodoForm(), 'error':'Bad Data passed in'})
        
 
+def completetodo(request, todo_pk):
+    todo = get_object_or_404(Todo, pk=todo_pk, user=request.user) #only the user should be able to complete
+    #only people that can post can complete a todo
+    if request.method == 'POST':
+        todo.datecompleted = timezone.now()
+        todo.save()
+        return redirect('currenttodos')
+    
+
+def deletetodo(request, todo_pk):
+    todo = get_object_or_404(Todo, pk=todo_pk, user=request.user) #only the user should be able to complete
+    #only people that can post can complete a todo
+    if request.method == 'POST':
+        todo.delete()
+        return redirect('currenttodos')
+        
+        
